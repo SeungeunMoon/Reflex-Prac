@@ -1,5 +1,5 @@
 import reflex as rx
 
 config = rx.Config(
-    app_name="ToDoList",
+    app_name="chat_app",
 )
