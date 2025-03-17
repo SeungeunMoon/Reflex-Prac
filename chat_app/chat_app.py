@@ -1,5 +1,6 @@
 import reflex as rx
 from .page1 import page_1
+from openai import OpenAI
 
 class State(rx.State):
     q: str
@@ -15,7 +16,15 @@ class State(rx.State):
             [self.q, self.ai_answer(self.q)]
         )
     def ai_answer(self, q):
-        return "답변을 거부함."
+        client = OpenAI(api_key="")
+        response = client.chat.completions.with_raw_response.create(
+            messages=[{
+                "role":"user",
+                "content":q,
+            }],
+            model="gpt-4o-mini"
+        )
+        return response.parse().choices[0].message.content
 
 def qa(qna):
     return rx.box(
