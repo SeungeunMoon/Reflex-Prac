@@ -1,6 +1,6 @@
 import reflex as rx
 from .page1 import page_1
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAi
 
 class State(rx.State):
     q: str
@@ -10,21 +10,34 @@ class State(rx.State):
             ["3.9와 3.11 중에 어느게 크지?", "3.11입니다."]
         ]
     
-    def append_qa(self, d):
+    async def append_qa(self, d):
         self.q = d["q"]
+        self.answer = ""
+        
         self.qa_list.append(
-            [self.q, self.ai_answer(self.q)]
+            [self.q, self.answer]
         )
-    def ai_answer(self, q):
-        client = OpenAI(api_key="")
-        response = client.chat.completions.with_raw_response.create(
+        
+        client = AsyncOpenAi()
+        session = await client.chat.completions.create(
             messages=[{
                 "role":"user",
-                "content":q,
+                "content":self.q,
             }],
-            model="gpt-4o-mini"
+            model="gpt-4o-mini",
+            stop=None,
+            stream=True
         )
-        return response.parse().choices[0].message.content
+        yield
+        
+        async for item in session:
+            if hasattr(item.choices[0].delta, "content"):
+                if item.choices[0].delta.content is None:
+                    break
+                self.answer += item.choices[0].delta.content
+                self.qa_list[-1][1] = self.answer
+                yield
+        
 
 def qa(qna):
     return rx.box(
