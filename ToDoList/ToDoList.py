@@ -1,4 +1,5 @@
 import reflex as rx
+import requests
 
 class State(rx.State):
     text: str
@@ -31,7 +32,18 @@ class State(rx.State):
         self.todo[i] = val
         self.on_edit[i] = False
 
+def fetch_data():
+    response = requests.get("http://localhost:8080/books")
+    if response.status_code == 200:
+        print("success")
+        return response.json()
+    return {"error":"Failed to fetch data"}
+
+def render_item(item):
+    return rx.text(item)
+
 def render_fn(item, idx):
+    data = fetch_data()
     return rx.hstack(
         rx.cond(
             State.completed[idx],
@@ -54,6 +66,7 @@ def render_fn(item, idx):
         ),
 
         rx.icon("trash-2", on_click=lambda: State.pop_todo(idx)),   
+        rx.foreach(data,render_item ),
         align='center'
     )
         
