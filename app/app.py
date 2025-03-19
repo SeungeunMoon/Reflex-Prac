@@ -49,7 +49,9 @@ def index():
             "Download Random Nums",
             on_click=State.download_random_data,
         )
-        ,rx.upload("Drag and drop files here or clock to select files",id="upload1"),
+        ,rx.upload(
+            "Drag and drop files here or click to select files",id="upload1",
+            on_drop=State.handle_upload(rx.upload_files(upload_id="upload1"))),
         rx.foreach(rx.selected_files("upload1"), rx.text),
         rx.button("UPLOAD",
                   on_click=State.handle_upload(rx.upload_files(upload_id="upload1")))
