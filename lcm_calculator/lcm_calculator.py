@@ -6,11 +6,9 @@ class State(rx.State):
     
     @rx.event
     def calculator(self, x):
-        nums = list(map(int,x["n"].split()))
-        cal = nums[0]
-        for i in range(1,len(nums)):
-            cal = math.lcm(cal, nums[i])
-            
+        nums = x["n"]
+        
+        cal = math.lcm(*[int(i) for i in nums.strip().split(" ")])
         self.answer = cal
 
 @rx.page()
